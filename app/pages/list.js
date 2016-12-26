@@ -112,6 +112,8 @@ export default class List  extends Component{
         this.fetchData(cacheData.nextPage);
     }
     _onRefresh=()=>{
+        console.log('on refresh event :' + this.state.isRefreshing);
+        
         if(this.state.isRefreshing)
             return;
         this.fetchData(0);
@@ -152,7 +154,6 @@ export default class List  extends Component{
                         <RefreshControl
                             refreshing={this.state.isRefreshing}
                             onRefresh={this._onRefresh}
-
                         />
                     }/>
             </View>

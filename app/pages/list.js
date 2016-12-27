@@ -15,6 +15,7 @@ import {
 import request from "../common/request";
 import ListItem from "../components/ListItem";
 import ListDetail from "./list.detail";
+import RefreshListview from "../components/RefreshListview";
 
 const cacheData = {
     datas:[],
@@ -76,7 +77,7 @@ export default class List  extends Component{
     }
 
     componentDidMount(){
-        this.fetchData(0);
+        // this.fetchData(0);
     }
     _loadPage=(rowData)=>{
         let {navigator} = this.props;
@@ -135,27 +136,34 @@ export default class List  extends Component{
         )
     }
 
+    // <ListView dataSource={this.state.dataSource} 
+    //                 renderRow={this._renderRow} 
+    //                 style={styles.listview}
+    //                 enableEmptySections={true}
+    //                 automaticallyAdjustContentInsets={false}
+    //                 onEndReached={this._fetchMoreData}
+    //                 onEndReachedThreshold={20}
+    //                 renderFooter={this._renderFooter}
+    //                 showsVerticalScrollIndicator={false}
+    //                 refreshControl={
+    //                     <RefreshControl
+    //                         refreshing={this.state.isRefreshing}
+    //                         onRefresh={this._onRefresh}
+    //                     />
+    //                 }/>
+
     render(){
         return (
             <View style={styles.container}>
                 <View style={styles.header}>
                     <Text style={styles.headerTxt}>视频列表</Text>
                 </View>
-                <ListView dataSource={this.state.dataSource} 
-                    renderRow={this._renderRow} 
-                    style={styles.listview}
-                    enableEmptySections={true}
-                    automaticallyAdjustContentInsets={false}
-                    onEndReached={this._fetchMoreData}
-                    onEndReachedThreshold={20}
-                    renderFooter={this._renderFooter}
-                    showsVerticalScrollIndicator={false}
-                    refreshControl={
-                        <RefreshControl
-                            refreshing={this.state.isRefreshing}
-                            onRefresh={this._onRefresh}
-                        />
-                    }/>
+                
+                 <RefreshListview fetchPromise={()=>{
+                     return request.get("list",{
+                                accessToken:"dddd"
+                            })
+                 }} renderRow={this._renderRow} pullrefresh={true} />
             </View>
         )
     }
@@ -176,17 +184,17 @@ const styles = StyleSheet.create({
         fontSize:16,
         fontWeight:"600"
     },
-    listview:{
-        paddingTop:30
-    },
-    loadingMore:{
+    // listview:{
+    //     paddingTop:30
+    // },
+    // loadingMore:{
 
-        marginVertical:20
-    },
-    loadingText:{
-        fontSize:18,
-        color:'red',
-        textAlign:'center'
-    },
+    //     marginVertical:20
+    // },
+    // loadingText:{
+    //     fontSize:18,
+    //     color:'red',
+    //     textAlign:'center'
+    // },
 });
 

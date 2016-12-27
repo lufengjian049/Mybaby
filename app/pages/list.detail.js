@@ -9,13 +9,17 @@ import {
     TouchableOpacity,
     ScrollView,
     Image,
-    ListView
+    ListView,
+    TextInput,
+    Modal,
 } from 'react-native';
 import Video from 'react-native-video';
 import Dimensions from 'Dimensions';
 import Icon from 'react-native-vector-icons/Ionicons';
+import Button from 'react-native-button';
 
 import request from "../common/request";
+import RefreshListview from "../components/RefreshListview";
 const {width,height} = Dimensions.get("window");
 
 export default class Detail extends Component{
@@ -35,9 +39,16 @@ export default class Detail extends Component{
             playing:false,
             videoOk:true,
 
-            dataSource:new ListView.DataSource({
-                rowHasChanged:(row1,row2) => row1 !== row2
-            }),
+            animationType:"fade", //none slide fade
+            modalShow:false,
+            transparent:false, // 是否透明
+
+            content:"",
+            isSendComment:false
+
+            // dataSource:new ListView.DataSource({
+            //     rowHasChanged:(row1,row2) => row1 !== row2
+            // }),
         }
         this._onLoadStart = this._onLoadStart.bind(this);
         this._onLoad = this._onLoad.bind(this);
@@ -51,6 +62,16 @@ export default class Detail extends Component{
         this._resume = this._resume.bind(this);
 
         this._renderRow = this._renderRow.bind(this);
+        this._renderHeader = this._renderHeader.bind(this);
+        this._renderFooter = this._renderFooter.bind(this);
+        this._fetchMoreData = this._fetchMoreData.bind(this);
+
+        this._focus = this._focus.bind(this);
+        // this._blur = this._blur.bind(this);
+
+        this._setModalVisible = this._setModalVisible.bind(this);
+        this._submit = this._submit.bind(this);
+        this._closeModal = this._closeModal.bind(this);
     }
     _resume(){
         if(this.state.paused){
@@ -127,21 +148,21 @@ export default class Detail extends Component{
         }
     }
 
-    _fetchData(){
-        request.get("comments",{
-            id:"333333"
-        }).then(
-            (data) =>{
-                let comments = data && data.data;
-                if(comments && comments.length)
-                    this.setState({
-                        dataSource:this.state.dataSource.cloneWithRows(comments)
-                    })
-            }
-        ).catch((err)=>{
-            console.log(err)
-        })
-    }
+    // _fetchData(){
+    //     request.get("comments",{
+    //         id:"333333"
+    //     }).then(
+    //         (data) =>{
+    //             let comments = data && data.data;
+    //             if(comments && comments.length)
+    //                 this.setState({
+    //                     dataSource:this.state.dataSource.cloneWithRows(comments)
+    //                 })
+    //         }
+    //     ).catch((err)=>{
+    //         console.log(err)
+    //     })
+    // }
     _renderRow(data){
         return (
             <View style={styles.replyBox} key={data._id}>
@@ -153,9 +174,80 @@ export default class Detail extends Component{
             </View>
         )
     }
-    componentDidMount(){
-        this._fetchData();
+    _renderHeader(){
+        let rowData = this.props.rowData;
+        return (
+            <View style={styles.listHeader}>
+                <View style={styles.infoBox}>
+                    <Image style={styles.avatar} source={{uri:rowData.author.avatar}} />
+                    <View style={styles.descBox}>
+                        <Text style={styles.nickname}>author:{rowData.author.nickname}</Text>
+                        <Text style={styles.title}>title:{rowData.title}</Text>
+                    </View>
+                </View>
+                <View style={styles.commentBox}>
+                    <View style={styles.comment}>
+                        <TextInput placeholder="comment here~~~" style={styles.inputContent} multiline={true} onFocus={this._focus}/>
+                    </View>
+                </View>
+                <View style={styles.commentArea}>
+                    <Text style={styles.commentTitle}>精彩评论</Text>  
+                </View>
+            </View>
+        )
     }
+    _focus(){
+        this._setModalVisible(true);
+    }
+    _closeModal(){
+        this._setModalVisible(false);
+    }
+    _submit(){
+        if(this.state.content){
+            if(!this.state.isSendComment){
+                this.setState({
+                    isSendComment:true
+                },()=>{
+                    request.post("comment",{
+                        id:"3232",
+                    }).then((data)=>{
+                        var redata = {
+
+                        };
+                        this.setState({
+                            isSendComment:false,
+                            content:'',
+                            modalShow:false,
+                            
+                        })
+                    }).catch((err)=>{
+                        console.log(err);
+                    })
+                })
+            }
+        }else{
+            alert("please enter comment;");
+        }
+    }
+    componentDidMount(){
+        // this._fetchData();
+    }
+    _setModalVisible(visible){
+        this.setState({
+            modalShow:visible
+        })
+    }
+    // <ListView
+    //                 dataSource={this.state.dataSource}
+    //                 renderRow={this._renderRow}
+    //                 enableEmptySections={true}
+    //                 automaticallyAdjustContentInsets={false}
+    //                 showsVerticalScrollIndicator={false}
+    //                 renderHeader={this._renderHeader}
+    //                 onEndReached={this._fetchMoreData}
+    //                 onEndReachedThreshold={20}
+    //                 renderFooter={this._renderFooter}
+    //             />
     render(){
         let rowData = this.props.rowData;
 
@@ -233,25 +325,33 @@ export default class Detail extends Component{
                     </View>
                 </View>
 
-                <ScrollView  enableEmptySections={true}
-                    automaticallyAdjustContentInsets={false}
-                    showsVerticalScrollIndicator={false}
-                    style={styles.scrollView}>
-                    <View style={styles.infoBox}>
-                        <Image style={styles.avatar} source={{uri:rowData.author.avatar}} />
-                        <View style={styles.descBox}>
-                            <Text style={styles.nickname}>{rowData.author.nickname}</Text>
-                            <Text style={styles.title}>{rowData.title}</Text>
+                <RefreshListview  fetchPromise={()=>{
+                     return request.get("comments",{
+                                id:"333333"
+                            })
+                 }} renderRow={this._renderRow}
+                    renderHeader={this._renderHeader} />
+                
+                <Modal animationType={this.state.animationType} transparent={this.state.transparent} 
+                        visible={this.state.modalShow} onRequestClose={
+                            ()=>{
+                                this._setModalVisible(false);
+                            }
+                        }>
+                        <View style={styles.modalContainer}>
+                            <Icon name="ios-close-outline" size={45} onPress={this._closeModal} style={styles.closeIcon} />
+                            <View style={styles.commentBox}>
+                                <View style={styles.comment}>
+                                    <TextInput placeholder="comment here ~~~" multiline={true} style={styles.content} defaultValue={this.state.content} onChangeText={(text)=>{
+                                        this.setState({
+                                            content:text
+                                        })
+                                    }} />
+                                </View>
+                            </View>
+                            <Button onPress={this._submit} style={styles.submitButton}>Comment</Button>
                         </View>
-                    </View>
-                    <ListView
-                        dataSource={this.state.dataSource}
-                        renderRow={this._renderRow}
-                        enableEmptySections={true}
-                        automaticallyAdjustContentInsets={false}
-                        showsVerticalScrollIndicator={false}
-                    />
-                </ScrollView>
+                </Modal>
             </View>
         )
     }
@@ -417,5 +517,56 @@ const styles = StyleSheet.create({
         marginTop:4,
         color:'blue'
     },
+
+    listHeader:{
+        marginTop:10,
+        width:width
+    },
+    commentBox:{
+        padding:8,
+        width:width,
+    },
+    comment:{},
+    inputContent:{
+        borderWidth:1,
+        borderColor:"#ddd",
+        borderRadius:4,
+        fontSize:14,
+        height:50,
+        color:"#333",
+        paddingLeft:4,
+    },
+    commentArea:{
+        width:width,
+        paddingLeft:10,
+        paddingBottom:8,
+        borderBottomWidth:1,
+        borderColor:"#eee"
+    },
+    commentTitle:{
+        color:"red"
+    },
+
+    modalContainer:{
+        flex:1,
+        paddingTop:45,
+        backgroundColor:"#fff",
+        alignItems:"center"
+    },
+    closeIcon:{
+        fontSize:30,
+        paddingTop:20,
+        color:'red'
+    },
+    submitButton:{
+        width:width-20,
+        padding:16,
+        marginTop:10,
+        borderWidth:1,
+        borderColor:"red",
+        borderRadius:4,
+        color:"red",
+        fontSize:18
+    }
     
 });

@@ -4,7 +4,8 @@ const config={
     api:{
         base:"http://rap.taobao.org/mockjs/11759/",
         list:"api/list",
-        comments:"api/comments"
+        comments:"api/comments",
+        comment:"api/comment",
     },
     fetchMap:{
         method:"POST",

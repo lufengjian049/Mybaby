@@ -20,6 +20,7 @@ import Button from 'react-native-button';
 
 import request from "../common/request";
 import RefreshListview from "../components/RefreshListview";
+import Header from "../components/Header";
 const {width,height} = Dimensions.get("window");
 
 export default class Detail extends Component{
@@ -257,13 +258,7 @@ export default class Detail extends Component{
         // ref="videoPlayer"
         return (
             <View style={styles.container}>
-                <View style={styles.header}>
-                    <TouchableOpacity style={styles.backBox} onPress={this._backLastPage}>
-                        <Icon name='ios-arrow-back' style={styles.backIcon}/>
-                        <Text style={styles.backText}>Back</Text>
-                    </TouchableOpacity>
-                    <Text style={styles.headerTitle} numberOfLines={1}>视频详情页</Text>
-                </View>
+                <Header title="视频详情页" navigator={this.props.navigator} />
                 
                 <View style={styles.videoBox}>
                     <Video
@@ -356,12 +351,6 @@ export default class Detail extends Component{
         )
     }
 
-    _backLastPage = ()=>{
-        let {navigator} = this.props;
-        if(navigator){
-            navigator.pop();
-        }
-    }
 }
 const styles = StyleSheet.create({
     container: {
@@ -369,56 +358,21 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: '#F5FCFF',
     },
-    header: {
-        flexDirection:"row",
-        justifyContent:"center",
-        alignItems:"center",
-        width:width,
-        height:64,
-        paddingLeft:10,
-        paddingRight:10,
-        borderBottomWidth:1,
-        borderColor:"rgba(255,0,0,0.2)",
-        backgroundColor:"#fff",
-        marginTop:Platform.OS === 'ios' ? 20 : 0,
-    },
-    backBox:{
-        position:"absolute",
-        left:12,
-        top:20,
-        flexDirection:"row",
-        width:60,
-        alignItems:"center"
-    },
-    backIcon:{
-        color:"#999",
-        fontSize:22,
-        marginRight:5
-    },
-    backText:{
-        color:"#999",
-        fontSize:16
-    },
-    headerTitle:{
-        width:width-120,
-        textAlign:"center",
-        fontSize:18,
-        color:"red",
-    },
+    
     videoBox:{
         backgroundColor:"#000",
         width:width,
-        height:360,
+        height:240,
     },
     video:{
         width:width,
-        height:350,
+        height:230,
     },
     loading:{
         position:'absolute',
         left:0,
         width:width,
-        top:160,
+        top:90,
         backgroundColor:'transparent',
         alignSelf:'center',
     },
@@ -438,7 +392,7 @@ const styles = StyleSheet.create({
     },
     play:{
         position:'absolute',
-        top:160,
+        top:90,
         left:width/2 - 30,
         width:60,
         height:60,
@@ -455,13 +409,13 @@ const styles = StyleSheet.create({
         top:0,
         left:0,
         width:width,
-        height:350,
+        height:230,
     },
     failText:{
         position:'absolute',
         left:0,
         width:width,
-        top:200,
+        top:120,
         backgroundColor:'transparent',
         textAlign:'center',
         color:'red',

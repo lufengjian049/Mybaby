@@ -16,6 +16,7 @@ import request from "../common/request";
 import ListItem from "../components/ListItem";
 import ListDetail from "./list.detail";
 import RefreshListview from "../components/RefreshListview";
+import Header from "../components/Header";
 
 const cacheData = {
     datas:[],
@@ -55,8 +56,8 @@ export default class List  extends Component{
             cacheData.datas = cacheData.datas.concat(data.data);
             cacheData.nextPage++;
             cacheData.total = data.total;
-            console.log("datas length = "+cacheData.datas.length);
-            console.log("total = "+cacheData.total);
+            // console.log("datas length = "+cacheData.datas.length);
+            // console.log("total = "+cacheData.total);
             setTimeout(()=>{
                 this.setState({
                     isLoadingMore:false,
@@ -100,8 +101,8 @@ export default class List  extends Component{
         )
     }
     _hasMore(){
-        console.log(cacheData.total)
-        console.log(cacheData.datas.length !== cacheData.total);
+        // console.log(cacheData.total)
+        // console.log(cacheData.datas.length !== cacheData.total);
         return cacheData.datas.length !== cacheData.total && cacheData.total>0;
     }
     _fetchMoreData=()=>{
@@ -120,6 +121,7 @@ export default class List  extends Component{
         this.fetchData(0);
     }
     _renderFooter=()=>{
+        console.log("render footer isLoadingMore = "+this.state.isLoadingMore +" isRefreshing="+this.state.isRefreshing);
         if(!this._hasMore() && cacheData.total !== 0){
             return (
                 <View style={styles.loadingMore}>
@@ -127,10 +129,13 @@ export default class List  extends Component{
                 </View>
             )
         }
-        if(!this.state.isLoadingMore)
+        if(!this.state.isLoadingMore){
+            console.log("haha");
             return (
                 <View style={styles.loadingMore}/>
             )
+        }
+            
         return (
             <ActivityIndicator />
         )
@@ -155,9 +160,7 @@ export default class List  extends Component{
     render(){
         return (
             <View style={styles.container}>
-                <View style={styles.header}>
-                    <Text style={styles.headerTxt}>视频列表</Text>
-                </View>
+                <Header title="视频列表"/>
                 
                  <RefreshListview fetchPromise={()=>{
                      return request.get("list",{
@@ -173,28 +176,5 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#F5FCFF',
     },
-    header:{
-        paddingTop:Platform.OS === "ios" ? 25 : 12,
-        paddingBottom:12,
-        backgroundColor:"#ee735c"
-    },
-    headerTxt:{
-        color:"#fff",
-        textAlign:"center",
-        fontSize:16,
-        fontWeight:"600"
-    },
-    // listview:{
-    //     paddingTop:30
-    // },
-    // loadingMore:{
-
-    //     marginVertical:20
-    // },
-    // loadingText:{
-    //     fontSize:18,
-    //     color:'red',
-    //     textAlign:'center'
-    // },
 });
 

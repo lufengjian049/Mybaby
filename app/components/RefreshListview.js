@@ -6,6 +6,7 @@ import {
     View,
     ListView,
     ActivityIndicator,
+    RefreshControl,
 } from 'react-native';
 
 const cacheData = {
@@ -26,6 +27,7 @@ export default class RefreshListview extends Component{
             isRefreshing:false
         }
 
+        this._fetchData = this._fetchData.bind(this);
         this._renderRow = this._renderRow.bind(this);
         this._renderFooter = this._renderFooter.bind(this);
         this._fetchMoreData = this._fetchMoreData.bind(this);
@@ -54,8 +56,9 @@ export default class RefreshListview extends Component{
             cacheData.nextPage++;
             cacheData.total = data.total;
             console.log("datas length = "+cacheData.datas.length);
-            console.log("total = "+cacheData.total);
-            setTimeout(()=>{
+            console.log("total \\= "+cacheData.total);
+            
+            // setTimeout(()=>{
                 this.setState({
                     isLoadingMore:false,
                     isRefreshing:false,
@@ -63,7 +66,7 @@ export default class RefreshListview extends Component{
                         cacheData.datas
                     )
                 })
-            },400)
+            // },400)
             
         }).catch((err)=>{
             this.setState({
@@ -73,7 +76,7 @@ export default class RefreshListview extends Component{
         })
     }
     _renderRow(rowdata){
-        this.props.renderRow(rowdata);
+        return this.props.renderRow(rowdata); //必须要return 要有返回
     }
     _hasMore(){
         return cacheData.datas.length !== cacheData.total && cacheData.total>0;
@@ -102,9 +105,9 @@ export default class RefreshListview extends Component{
     _renderHeader(){
         let {renderHeader} = this.props;
         if(renderHeader)
-            renderHeader();
+            return renderHeader();
         else
-            return null;
+            return <View></View>;
     }
     _fetchMoreData(){
         if(!this._hasMore() || this.state.isLoadingMore){
@@ -125,7 +128,7 @@ export default class RefreshListview extends Component{
     componentDidMount(){
         this._fetchData(0);
     }
-
+    
     render(){
         return (
             <ListView dataSource={this.state.dataSource} 
@@ -138,12 +141,12 @@ export default class RefreshListview extends Component{
                     renderFooter={this._renderFooter}
                     renderHeader={this._renderHeader}
                     showsVerticalScrollIndicator={false}
-                    refreshControl={ pullrefresh ?
+                    refreshControl={ this.props.pullrefresh ?
                         <RefreshControl
                             refreshing={this.state.isRefreshing}
                             onRefresh={this._onRefresh}
                         />
-                        : null
+                        : <View></View>
                     }
             />
         )

@@ -64,8 +64,8 @@ export default class Detail extends Component{
 
         this._renderRow = this._renderRow.bind(this);
         this._renderHeader = this._renderHeader.bind(this);
-        this._renderFooter = this._renderFooter.bind(this);
-        this._fetchMoreData = this._fetchMoreData.bind(this);
+        // this._renderFooter = this._renderFooter.bind(this);
+        // this._fetchMoreData = this._fetchMoreData.bind(this);
 
         this._focus = this._focus.bind(this);
         // this._blur = this._blur.bind(this);
@@ -324,7 +324,7 @@ export default class Detail extends Component{
                      return request.get("comments",{
                                 id:"333333"
                             })
-                 }} renderRow={this._renderRow}
+                 }} renderRow={this._renderRow} pullrefresh={true}
                     renderHeader={this._renderHeader} />
                 
                 <Modal animationType={this.state.animationType} transparent={this.state.transparent} 
@@ -337,7 +337,7 @@ export default class Detail extends Component{
                             <Icon name="ios-close-outline" size={45} onPress={this._closeModal} style={styles.closeIcon} />
                             <View style={styles.commentBox}>
                                 <View style={styles.comment}>
-                                    <TextInput placeholder="comment here ~~~" multiline={true} style={styles.content} defaultValue={this.state.content} onChangeText={(text)=>{
+                                    <TextInput placeholder="comment here ~~~" multiline={true} style={styles.inputContent} defaultValue={this.state.content} onChangeText={(text)=>{
                                         this.setState({
                                             content:text
                                         })

@@ -8,6 +8,7 @@ import {
     ActivityIndicator,
     RefreshControl,
 } from 'react-native';
+// import Immutable from "immutable";
 
 const cacheData = {
     datas:[],
@@ -16,7 +17,7 @@ const cacheData = {
 }
 
 export default class RefreshListview extends Component{
-    // static propType -- renderRow  fetchPromise pullrefresh renderFooter renderHeader
+    // static propType -- renderRow  fetchPromise pullrefresh renderFooter renderHeader addData
     constructor(props){
         super(props)
         this.state = {
@@ -123,6 +124,22 @@ export default class RefreshListview extends Component{
         if(this.state.isRefreshing)
             return;
         this._fetchData(0);
+    }
+    componentWillReceiveProps(nextProps){
+        if(nextProps.addData ){
+            // let curMap = Immutable.Map(this.props.addData);
+            // let nextMap = Immutable.Map(nextProps.addData);
+            // if(Immutable.is(curMap,nextMap)){
+            if(this.props.addData && this.props.addData._id == nextProps.addData._id){
+                return;
+            }
+            cacheData.datas = [nextProps.addData].concat(cacheData.datas);
+            cacheData.total = data.total + 1;
+            this.setState({
+                dataSource:this.state.dataSource.cloneWithRows(cacheData.datas)
+            })
+            // }
+        }
     }
 
     componentDidMount(){

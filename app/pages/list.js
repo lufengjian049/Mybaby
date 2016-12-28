@@ -15,12 +15,11 @@ import Header from "../components/Header";
 export default class List  extends Component{
     constructor(props) {
         super(props);
+        this._loadPage = this._loadPage.bind(this);
+        this._renderRow = this._renderRow.bind(this);
     }
-
-    componentDidMount(){
-        // this.fetchData(0);
-    }
-    _loadPage=(rowData)=>{
+    
+    _loadPage(rowData){
         let {navigator} = this.props;
         if(navigator){
             navigator.push({
@@ -33,7 +32,7 @@ export default class List  extends Component{
         }
     }
 
-    _renderRow = (rowData)=>{
+    _renderRow(rowData){
         return (
             <ListItem rowData={rowData} 
                 onSelect = {()=>this._loadPage(rowData)}

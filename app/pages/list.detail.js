@@ -4,16 +4,11 @@ import {
     StyleSheet,
     Text,
     View,
-    Platform,
-    ActivityIndicator,
-    TouchableOpacity,
-    ScrollView,
     Image,
-    ListView,
     TextInput,
     Modal,
+    Platform,
 } from 'react-native';
-import Video from 'react-native-video';
 import Dimensions from 'Dimensions';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Button from 'react-native-button';
@@ -21,149 +16,32 @@ import Button from 'react-native-button';
 import request from "../common/request";
 import RefreshListview from "../components/RefreshListview";
 import Header from "../components/Header";
+import Video from "../components/Video";
 const {width,height} = Dimensions.get("window");
 
 export default class Detail extends Component{
     constructor(props) {
         super(props);
         this.state = {
-            rate: 1,
-            volume: 1,
-            muted: true,
-            resizeMode: 'contain',
-            paused: false,
-
-            duration: 0.0,
-            currentTime: 0.0,
-
-            videoLoaded:false,
-            playing:false,
-            videoOk:true,
-
             animationType:"fade", //none slide fade
             modalShow:false,
             transparent:false, // 是否透明
 
             content:"",
-            isSendComment:false
+            isSendComment:false,
 
-            // dataSource:new ListView.DataSource({
-            //     rowHasChanged:(row1,row2) => row1 !== row2
-            // }),
+            listnewdata:null, //评论实时添加的数据
         }
-        this._onLoadStart = this._onLoadStart.bind(this);
-        this._onLoad = this._onLoad.bind(this);
-        this._onProgress = this._onProgress.bind(this);
-        this._onEnd = this._onEnd.bind(this);
-        this._onError = this._onError.bind(this);
-
-        this._rePlay = this._rePlay.bind(this);
-
-        this._pause = this._pause.bind(this);
-        this._resume = this._resume.bind(this);
-
         this._renderRow = this._renderRow.bind(this);
         this._renderHeader = this._renderHeader.bind(this);
-        // this._renderFooter = this._renderFooter.bind(this);
-        // this._fetchMoreData = this._fetchMoreData.bind(this);
 
         this._focus = this._focus.bind(this);
-        // this._blur = this._blur.bind(this);
 
         this._setModalVisible = this._setModalVisible.bind(this);
         this._submit = this._submit.bind(this);
         this._closeModal = this._closeModal.bind(this);
     }
-    _resume(){
-        if(this.state.paused){
-            this.setState({
-                paused:false
-            });
-        }
-    }
-
-    _pause(){
-        if(!this.state.paused){
-            this.setState({
-                paused:true
-            });
-        }
-    }
-
-    _rePlay(){
-        this.player.seek(0);
-        this.setState({
-            paused:false, //android
-            // playing:true
-        })
-    }
-
-    _onLoadStart(){
-        console.log('_onLoadStart');
-    }
-
-    _onLoad(data){
-        console.log('_onLoad----视频总长度:'+data.duration);
-        this.setState({duration: data.duration});
-    }
-
-    _onProgress(data){
-        if(!this.state.videoLoaded){
-            this.setState({
-                videoLoaded:true,
-            });
-        }
-        if(!this.state.playing){
-            this.setState({
-                playing:true,
-            });
-        }
-        if(!this.state.paused){
-            this.setState({currentTime: data.currentTime});
-        }
-        // console.log('_onProgress----数据对象：'+JSON.stringify(data));
-            
-        console.log('_onProgress----当前时间：'+data.currentTime +" duration " + this.state.duration);
-    }
-
-    _onEnd(){
-        this.setState({
-                currentTime:this.state.duration,
-                playing:false,
-                paused:true
-            }
-        );
-    }
-    _onError(error){
-        console.log('错误：'+JSON.stringify(error));
-        this.setState({
-            videoOk:false,
-        });
-    }
-
-    getCurrentTimePercentage() {
-        if (this.state.currentTime > 0) {
-            return parseFloat(this.state.currentTime) / parseFloat(this.state.duration);
-        } else {
-            return 0;
-        }
-    }
-
-    // _fetchData(){
-    //     request.get("comments",{
-    //         id:"333333"
-    //     }).then(
-    //         (data) =>{
-    //             let comments = data && data.data;
-    //             if(comments && comments.length)
-    //                 this.setState({
-    //                     dataSource:this.state.dataSource.cloneWithRows(comments)
-    //                 })
-    //         }
-    //     ).catch((err)=>{
-    //         console.log(err)
-    //     })
-    // }
+    
     _renderRow(data){
         return (
             <View style={styles.replyBox} key={data._id}>
@@ -187,9 +65,19 @@ export default class Detail extends Component{
                     </View>
                 </View>
                 <View style={styles.commentBox}>
-                    <View style={styles.comment}>
-                        <TextInput placeholder="comment here~~~" style={styles.inputContent} multiline={true} onFocus={this._focus}/>
+                    <View style={[styles.comment,Platform.os != 'ios' ? styles.commentAndroid : {}]}>
+                        <TextInput placeholder="comment here~~~" style={styles.inputContent} multiline={true} 
+                        onFocus={this._focus} underlineColorAndroid="transparent" keyboardType="default" onChangeText={(text) => {
+                            this.setState({
+                                content:text
+                            })
+                        }}/>
                     </View>
+                    {Platform.os == "ios" ? null :
+                        <View style={styles.commentBtn}>
+                            <Text style={styles.commentSubmit} onPress={this._submit}>comment</Text>
+                        </View>
+                        }
                 </View>
                 <View style={styles.commentArea}>
                     <Text style={styles.commentTitle}>精彩评论</Text>  
@@ -198,7 +86,8 @@ export default class Detail extends Component{
         )
     }
     _focus(){
-        this._setModalVisible(true);
+        if(Platform.os == "ios")
+            this._setModalVisible(true);
     }
     _closeModal(){
         this._setModalVisible(false);
@@ -210,16 +99,23 @@ export default class Detail extends Component{
                     isSendComment:true
                 },()=>{
                     request.post("comment",{
-                        id:"3232",
+                        vedioid:"3232",
+                        content:this.state.content,
+                        userid:""
                     }).then((data)=>{
                         var redata = {
-
+                            id:data._id,
+                            content:this.state.content,
+                            replyBy:{
+                                nickname:'dfy',
+                                avatar:'http://dummyimage.com/640x640/967776)'
+                            }
                         };
                         this.setState({
                             isSendComment:false,
                             content:'',
                             modalShow:false,
-                            
+                            listnewdata:redata
                         })
                     }).catch((err)=>{
                         console.log(err);
@@ -238,89 +134,16 @@ export default class Detail extends Component{
             modalShow:visible
         })
     }
-    // <ListView
-    //                 dataSource={this.state.dataSource}
-    //                 renderRow={this._renderRow}
-    //                 enableEmptySections={true}
-    //                 automaticallyAdjustContentInsets={false}
-    //                 showsVerticalScrollIndicator={false}
-    //                 renderHeader={this._renderHeader}
-    //                 onEndReached={this._fetchMoreData}
-    //                 onEndReachedThreshold={20}
-    //                 renderFooter={this._renderFooter}
-    //             />
     render(){
         let rowData = this.props.rowData;
-
-        const flexCompleted = this.getCurrentTimePercentage() * 100;
-        console.log(flexCompleted);
-        const flexRemaining = (1 - this.getCurrentTimePercentage()) * 100;
         // ref="videoPlayer"
         return (
             <View style={styles.container}>
                 <Header title="视频详情页" navigator={this.props.navigator} />
-                
-                <View style={styles.videoBox}>
-                    <Video
-                        source={{uri: "http://www.reactnative.vip/data/movie.mp4"}}
-                        style={styles.video}
-                        rate={this.state.rate}
-                        paused={this.state.paused}
-                        volume={this.state.volume}
-                        muted={this.state.muted}
-                        resizeMode={this.state.resizeMode}
-                        repeat={false}
 
-                        ref={(ref) => {
-                            this.player = ref
-                        }} 
+                <Video src="http://www.reactnative.vip/data/movie.mp4" />
 
-                        onLoadStart={this._onLoadStart}
-                        onLoad={this._onLoad}
-                        onProgress={this._onProgress}
-                        onEnd={this._onEnd}
-                        onError={this._onError}
-                    />
-
-                    {!this.state.videoOk ?
-                        <Text style={styles.failText}>很抱歉,视频出错啦！</Text>
-                        :null}
-
-                    {!this.state.videoLoaded ?
-                       <ActivityIndicator color="red" size="large"
-                        style={styles.loading} />
-                        :null}
-
-                    {this.state.videoLoaded && !this.state.playing ?
-                        <Icon
-                            name='ios-play'
-                            size={45}
-                            onPress={this._rePlay}
-                            style={styles.play} />
-                        :null}
-
-                    {this.state.videoLoaded && this.state.playing ?
-                        <TouchableOpacity
-                        onPress={this._pause}
-                        style={styles.pauseArea}
-                        >
-                            {this.state.paused ?
-                                <Icon
-                                    name='ios-play'
-                                    size={45}
-                                    onPress={this._resume}
-                                    style={styles.play} />
-                                :null}
-                        </TouchableOpacity>
-                        :null}
-
-                    <View style={styles.progress}>
-                        <View style={[styles.innerProgressCompleted, {flex: flexCompleted}]} />
-                        <View style={[styles.innerProgressRemaining, {flex: flexRemaining}]} />
-                    </View>
-                </View>
-
-                <RefreshListview  fetchPromise={()=>{
+                <RefreshListview addData={this.state.listnewdata}  fetchPromise={()=>{
                      return request.get("comments",{
                                 id:"333333"
                             })
@@ -357,69 +180,6 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         backgroundColor: '#F5FCFF',
-    },
-    
-    videoBox:{
-        backgroundColor:"#000",
-        width:width,
-        height:240,
-    },
-    video:{
-        width:width,
-        height:230,
-    },
-    loading:{
-        position:'absolute',
-        left:0,
-        width:width,
-        top:90,
-        backgroundColor:'transparent',
-        alignSelf:'center',
-    },
-    progress: {
-        flex: 1,
-        flexDirection: 'row',
-        borderRadius: 3,
-        overflow: 'hidden',
-    },
-    innerProgressCompleted: {
-        height: 10,
-        backgroundColor: 'red',
-    },
-    innerProgressRemaining: {
-        height: 10,
-        backgroundColor: '#cccccc',
-    },
-    play:{
-        position:'absolute',
-        top:90,
-        left:width/2 - 30,
-        width:60,
-        height:60,
-        paddingTop:10,
-        paddingLeft:22,
-        backgroundColor:'transparent',
-        borderColor:'#000',
-        borderWidth:1,
-        borderRadius:30,
-        color:'#ed7b66'
-    },
-    pauseArea:{
-        position:'absolute',
-        top:0,
-        left:0,
-        width:width,
-        height:230,
-    },
-    failText:{
-        position:'absolute',
-        left:0,
-        width:width,
-        top:120,
-        backgroundColor:'transparent',
-        textAlign:'center',
-        color:'red',
-        fontSize:20,
     },
 
     scrollView:{},
@@ -479,8 +239,16 @@ const styles = StyleSheet.create({
     commentBox:{
         padding:8,
         width:width,
+        flexDirection:"row",
     },
     comment:{},
+    commentAndroid:{
+        borderWidth:1,
+        borderColor:"#ddd",
+        borderRadius:4,
+        height:50,
+        flex:1,
+    },
     inputContent:{
         borderWidth:1,
         borderColor:"#ddd",
@@ -489,6 +257,18 @@ const styles = StyleSheet.create({
         height:50,
         color:"#333",
         paddingLeft:4,
+    },
+    commentBtn:{
+        width:40,
+        height:50,
+        borderWidth:1,
+        borderColor:"#ddd",
+        borderRadius:4,
+        justifyContent:"center",
+        alignItems:"center",
+    },
+    commentSubmit:{
+        fontSize:18,
     },
     commentArea:{
         width:width,

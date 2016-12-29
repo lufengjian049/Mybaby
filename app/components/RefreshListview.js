@@ -130,11 +130,14 @@ export default class RefreshListview extends Component{
             // let curMap = Immutable.Map(this.props.addData);
             // let nextMap = Immutable.Map(nextProps.addData);
             // if(Immutable.is(curMap,nextMap)){
-            if(this.props.addData && this.props.addData._id == nextProps.addData._id){
+            console.log("this props" + JSON.stringify(this.props.addData));
+            console.log("next props" + JSON.stringify(nextProps.addData));
+            if(this.props.addData && this.props.addData.id == nextProps.addData.id){
                 return;
             }
+            console.log("re DataSource");
             cacheData.datas = [nextProps.addData].concat(cacheData.datas);
-            cacheData.total = data.total + 1;
+            cacheData.total = cacheData.total + 1;
             this.setState({
                 dataSource:this.state.dataSource.cloneWithRows(cacheData.datas)
             })

@@ -8,7 +8,7 @@ import {
     ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import Video from 'react-native-video';
+import RNVideo from 'react-native-video';
 import Dimensions from 'Dimensions';
 
 const {width,height} = Dimensions.get("window");
@@ -120,7 +120,7 @@ export default class Video extends Component{
         const flexRemaining = (1 - this.getCurrentTimePercentage()) * 100;
         return (
             <View style={styles.videoBox}>
-                <Video
+                <RNVideo
                     source={{uri: this.props.src}}
                     style={styles.video}
                     rate={this.state.rate}

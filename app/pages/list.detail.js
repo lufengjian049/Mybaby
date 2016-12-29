@@ -65,7 +65,7 @@ export default class Detail extends Component{
                     </View>
                 </View>
                 <View style={styles.commentBox}>
-                    <View style={[styles.comment,Platform.os != 'ios' ? styles.commentAndroid : {}]}>
+                    <View style={[styles.comment,Platform.OS != 'ios' ? styles.commentAndroid : {}]}>
                         <TextInput placeholder="comment here~~~" style={styles.inputContent} multiline={true} 
                         onFocus={this._focus} underlineColorAndroid="transparent" keyboardType="default" onChangeText={(text) => {
                             this.setState({
@@ -73,7 +73,7 @@ export default class Detail extends Component{
                             })
                         }}/>
                     </View>
-                    {Platform.os == "ios" ? null :
+                    {Platform.OS == "ios" ? null :
                         <View style={styles.commentBtn}>
                             <Text style={styles.commentSubmit} onPress={this._submit}>comment</Text>
                         </View>
@@ -86,7 +86,7 @@ export default class Detail extends Component{
         )
     }
     _focus(){
-        if(Platform.os == "ios")
+        if(Platform.OS == "ios")
             this._setModalVisible(true);
     }
     _closeModal(){
@@ -103,8 +103,9 @@ export default class Detail extends Component{
                         content:this.state.content,
                         userid:""
                     }).then((data)=>{
+                        console.log(data.data._id);
                         var redata = {
-                            id:data._id,
+                            id:data.data._id,
                             content:this.state.content,
                             replyBy:{
                                 nickname:'dfy',
@@ -250,6 +251,7 @@ const styles = StyleSheet.create({
         flex:1,
     },
     inputContent:{
+        width:width-10,
         borderWidth:1,
         borderColor:"#ddd",
         borderRadius:4,
@@ -259,13 +261,14 @@ const styles = StyleSheet.create({
         paddingLeft:4,
     },
     commentBtn:{
-        width:40,
+        width:80,
         height:50,
         borderWidth:1,
         borderColor:"#ddd",
         borderRadius:4,
         justifyContent:"center",
         alignItems:"center",
+        marginLeft:2,
     },
     commentSubmit:{
         fontSize:18,

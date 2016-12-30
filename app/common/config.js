@@ -6,6 +6,7 @@ const config={
         list:"api/list",
         comments:"api/comments",
         comment:"api/comment",
+        verifycode:"api/verifycode",
     },
     fetchMap:{
         method:"POST",

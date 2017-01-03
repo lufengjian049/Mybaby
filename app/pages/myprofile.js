@@ -6,7 +6,8 @@ import {
     AsyncStorage,
     Image,
     Text,
-    View
+    View,
+    Platform,
 } from 'react-native';
 
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -36,8 +37,8 @@ export default class Account extends Component {
         }
         return (
             <View style={styles.container}>
-                <Header title="My profile"/>
-                {!user.avatar ?
+                <Header title="个人信息"/>
+                {user.avatar ?
                     <TouchableOpacity style={styles.avatarContainer} onPress={this._pickPhoto}>
                         <Image style={styles.avatarContainer}
                                source={{uri: user.avatar}}>
@@ -49,7 +50,6 @@ export default class Account extends Component {
                             </View>
                             <Text style={styles.avatarText}>点击这里更换头像</Text>
                         </Image>
-
                     </TouchableOpacity>
                     :
                     <View style={styles.avatarContainer}>
@@ -116,10 +116,11 @@ export default class Account extends Component {
                 // const source = {uri: 'data:image/jpeg;base64,' + response.data, isStatic: true};
 
                 // or a reference to the platform specific asset location
+                let source={};
                 if (Platform.OS === 'ios') {
-                const source = {uri: response.uri.replace('file://', ''), isStatic: true};
+                 source = {uri: response.uri.replace('file://', ''), isStatic: true};
                 } else {
-                const source = {uri: response.uri, isStatic: true};
+                 source = {uri: response.uri, isStatic: true};
                 }
                 let userdata = this.state.user;
                 userdata.avatar = source.uri;
@@ -133,14 +134,28 @@ export default class Account extends Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
         backgroundColor: '#F5FCFF',
     },
-    welcome: {
-        fontSize: 20,
-        textAlign: 'center',
-        margin: 10,
+    avatarContainer:{
+        width:width,
+        height:150,
+        justifyContent:"center",
+        alignItems:"center",
     },
+    avatarBox:{
+        
+    },
+    avatar:{
+        height:60,
+        width:60,
+        borderRadius:30,
+        borderColor:"#ee735d",
+        borderWidth:1,
+    },
+    avatarText:{
+        backgroundColor:"transparent",
+        marginTop:6,
+        color:"#fff"
+    }
 
 });

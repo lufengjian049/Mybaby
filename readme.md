@@ -7,3 +7,5 @@
 3. 封装的RefreshListView会因为文本输入的onChangeText事件而多次Update
 
 AsyncStorage setItem只能设置 string？
+component button 
+util(width height 封装)

@@ -8,6 +8,9 @@ import {
 } from "react-native";
 import Header from "../components/Header";
 import request from "../common/request";
+import Dimensions from 'Dimensions';
+
+const {width, height} = Dimensions.get('window');
 
 export default class Login extends Component{
     constructor(props){
@@ -46,11 +49,12 @@ export default class Login extends Component{
         }).then(()=>{
             this.setState({
                 codeSended:true,
-                second:6
+                second:6,
+                verifyCode:""
             })
             this._interval = setInterval(()=>{
                 var curSec = this.state.second;
-                if(curSec == 0){
+                if(curSec <= 0){
                     clearInterval(this._interval);
                 }
                 this.setState({
@@ -63,47 +67,51 @@ export default class Login extends Component{
         this._interval && clearInterval(this._interval);
     }
     render(){
-        <View style={styles.container}>
-            <Header title=""/>
-            <View style={styles.signupBox}>
-                <TextInput placeholder='输入手机号'
-                        autoCapitalize={'none'}
-                        autoCorrect={false}
-                        keyboardType={'phone-pad'}
-                        style={styles.inputField}
-                        onChangeText={(text)=> {
-                            this.setState({
-                                phoneNumber: text
-                            });
-                        }} />
-                {
-                    this.state.codeSended ?
-                        <View style={styles.verifyBox}>
-                            <TextInput placeholder='输入验证码'
-                                        autoCapitalize={'none'}
-                                        autoCorrect={false}
-                                        keyboardType={'phone-pad'}
-                                        style={styles.inputField}
-                                        onChangeText={(text)=> {
-                                            this.setState({
-                                                verifyCode: text
-                                            });
-                                        }} />
-                            <View style={styles.countDownBox}>
-                                {this.state.second == 0 ? <Text style={styles.countDownText} onPress={this._getCode}>replace</Text> :
-                                <Text style={styles.countDownText}>{this.state.second}s</Text> }
-                            </View>
-                        </View> : null
-                }
-                <View style={styles.btn}>
-                    {
-                    this.state.codeSended ?
-                        <Text style={styles.btnText} onPress={this._login}>Sign In</Text> :
-                        <Text style={styles.btnText} onPress={this._getCode}>Get Code</Text>
-                    }
+        return (<View style={styles.container}>
+                    <Header title="快速登录"/>
+                    <View style={styles.signupBox}>
+                        <TextInput placeholder='输入手机号'
+                                autoCapitalize={'none'}
+                                autoCorrect={false}
+                                keyboardType={'phone-pad'}
+                                underlineColorAndroid="transparent"
+                                style={styles.inputField}
+                                onChangeText={(text)=> {
+                                    this.setState({
+                                        phoneNumber: text
+                                    });
+                                }} />
+                        {
+                            this.state.codeSended ?
+                                <View style={styles.verifyBox}>
+                                    <TextInput placeholder='输入验证码'
+                                                autoCapitalize={'none'}
+                                                autoCorrect={false}
+                                                keyboardType={'phone-pad'}
+                                                underlineColorAndroid="transparent"
+                                                style={[styles.inputField,{flex:1}]}
+                                                defaultValue={this.state.verifyCode}
+                                                onChangeText={(text)=> {
+                                                    this.setState({
+                                                        verifyCode: text
+                                                    });
+                                                }} />
+                                    <View style={styles.countDownBox}>
+                                        {this.state.second <= 0 ? <Text style={styles.countDownText} onPress={this._getCode}>replace</Text> :
+                                        <Text style={styles.countDownText}>{this.state.second}s</Text> }
+                                    </View>
+                                </View> : null
+                        }
+                        <View style={styles.btn}>
+                            {
+                            this.state.codeSended ?
+                                <Text style={styles.btnText} onPress={this._login}>Sign In</Text> :
+                                <Text style={styles.btnText} onPress={this._getCode}>Get Code</Text>
+                            }
+                        </View>
+                    </View>
                 </View>
-            </View>
-        </View>
+        )
     }
 }
 
@@ -118,19 +126,21 @@ const styles = StyleSheet.create({
         paddingRight:10,
     },
     inputField:{
-        flex:1,
+        // flex:1,
         height:40,
         borderWidth:1,
         borderColor:"#ccc",
         borderRadius:4,
         padding:2,
+        marginTop:6,
     },
     verifyBox:{
         flexDirection:"row",
         justifyContent:"space-between",
-        height:40,
+        height:46,
     },
     countDownBox:{
+        marginTop:6,
         width:100,
         borderWidth:1,
         borderRadius:4,
@@ -145,5 +155,20 @@ const styles = StyleSheet.create({
         color:"#fff",
         fontWeight:'600',
     },
-
+    btn:{
+        padding:8,
+        borderWidth:1,
+        borderColor:"#ee735d",
+        borderRadius:4,
+        marginTop:6,
+        height:40,
+        backgroundColor:"#ee735d",
+        justifyContent:"center",
+        alignItems:"center",
+    },
+    btnText:{
+        fontSize:18,
+        color:"#fff",
+        fontWeight:"600"
+    }
 })

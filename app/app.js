@@ -11,7 +11,7 @@ import List from "./pages/list";
 import Moviedit from "./pages/moviedit";
 import Myprofile from "./pages/myprofile";
 import Picture from "./pages/picture";
-import Login from "../pages/login";
+import Login from "./pages/login";
 
 import TabBar from "./components/TabBar";
 import ScrollableTabView from "react-native-scrollable-tab-view";
@@ -32,6 +32,7 @@ export default class App extends Component{
     _asyncGetAppStatus(){
         AsyncStorage.getItem("user")
             .then((data)=>{
+                console.log("-----"+data);
                 var user = null,newState={isCkecking:false};
                 if(data){
                     user = JSON.parse(data);
@@ -44,6 +45,9 @@ export default class App extends Component{
                 }
                 this.setState(newState);
             })
+        // .catch(()=>{
+        //     console.log("ddd")
+        // })
     }
     _afterLogin(user){
         var user2 = JSON.stringify(user);
@@ -56,13 +60,14 @@ export default class App extends Component{
             })
     }
 
-    componetDidMount(){
+    componentDidMount(){
         this._asyncGetAppStatus();
     }
 
     render(){
         let tabNames = this.state.tabNames;
         let tabIconNames = this.state.tabIconNames;
+        console.log("Checking:"+this.state.isCkecking);
         if(this.state.isCkecking){
             return (
                 <View>
@@ -87,7 +92,7 @@ export default class App extends Component{
                         }
                     }
                     locked={false}
-                    initialPage={0}
+                    initialPage={3}
                     prerenderingSiblingsNumber={1}
                 >   
                     <Navigator
@@ -115,7 +120,10 @@ export default class App extends Component{
                 </ScrollableTabView>
             )
         else
-            <Login afterLogin={this._afterLogin}/>
+            return (
+                <Login afterLogin={this._afterLogin}>
+                </Login>
+            )
     }
 }
 

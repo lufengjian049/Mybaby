@@ -8,4 +8,3 @@
 
 AsyncStorage setItem只能设置 string？
 component button 
-util(width height 封装)

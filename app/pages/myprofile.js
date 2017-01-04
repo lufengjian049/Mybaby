@@ -11,11 +11,10 @@ import {
 } from 'react-native';
 
 import Icon from 'react-native-vector-icons/Ionicons';
-import Dimensions from 'Dimensions';
 import Header from "../components/Header";
 import ImagePicker from 'react-native-image-picker';
 
-const {width, height} = Dimensions.get('window');
+import {window} from "../common/constants";
 
 export default class Account extends Component {
 
@@ -137,7 +136,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#F5FCFF',
     },
     avatarContainer:{
-        width:width,
+        width:window.width,
         height:150,
         justifyContent:"center",
         alignItems:"center",
